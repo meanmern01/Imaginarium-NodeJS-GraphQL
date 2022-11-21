@@ -8,6 +8,9 @@ const typeDefs = gql`
         password:String!
         conpassword:String
         authToken:String
+    }
+    type Otp {
+        otp:String
     }   
     type Query {
         getUser: [User!]
@@ -15,7 +18,8 @@ const typeDefs = gql`
     type Mutation {
         signUp(username:String!,email:String!,password:String!,conpassword:String!):User
         signIn(email:String!,password:String!):User
-        forgotPassword(email:String,password:String,conpassword:String):User
+        forgotPasswordOtp(email:String):User
+        verifyOtp(otp:String,password:String,conpassword:String):User
     }
 
 `

@@ -1,7 +1,10 @@
 const UserAuth = require('../../model/Auth')
+const OtpData = require('../../model/Otp')
 var validator = require('validator');
 var bcrypt = require('bcrypt')
 const jwt = require("jsonwebtoken");
+const otpGenerator = require('otp-generator')
+const { SendEmail } = require('../../utils/nodemailer')
 
 const extime = 10 * 60 * 60;
 const genratetoken = (id) => {
@@ -91,8 +94,31 @@ const resolvers = {
                 return console.log(error.message)
             }
             return data 
+        },
+
+        forgotPasswordOtp : async (parent,args)=>{
+            try {
+                const {email} = args
+                const user = await UserAuth.findOne({email:email})
+                if(!user){
+                    return console.log("User Register First!!");
+                }
+                let otp = await otpGenerator.generate(6, { lowerCaseAlphabets: false , upperCaseAlphabets: false, specialChars: false });
+                await SendEmail(user.email,'Verification Mail',otp)
+                let hashOtp = await bcrypt.hash(otp,10)
+                await new OtpData({
+                    email, 
+                    otp:hashOtp,
+                    createdAt: Date.now(),
+                    expiresAt: Date.now() + 1000 * 10,                    
+                }).save().then(()=>{
+                    console.log("Otp Send Successfully");
+                })
+            } catch (error) {
+                return console.log(error.message)
+            }
+            return null;
         }
     }
-}
-
+}      
 module.exports = { resolvers }
