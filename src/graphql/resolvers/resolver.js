@@ -200,7 +200,47 @@ const resolvers = {
                 return console.log(error.message)
             }
             return null
-        }
+        },
+
+        signUpbyGoogle : async (parent, args)=>{
+            let data;
+            try {
+                const { email} = args;
+                let user = await UserAuth.findOne({ email:email });
+                if (user) {
+                    return console.log("User Is Already Existes...");
+                }
+                token = genratetoken(email)
+                await new UserAuth({ ...args,authToken:token,verify:true}).save()
+                .then((result)=>{
+                    data = result
+                    return console.log("User Login Successfully");
+                })
+              } catch (error) {
+                return console.log(error.message)
+            }
+            return data;
+        },
+
+        signUpbyApple : async (parent, args)=>{
+            let data;
+            try {
+                const { email} = args;
+                let user = await UserAuth.findOne({ email:email });
+                if (user) {
+                    return console.log("User Is Already Existes...");
+                }
+                token = genratetoken(email)
+                await new UserAuth({ ...args,authToken:token,verify:true}).save()
+                .then((result)=>{
+                    data = result
+                    return console.log("User Login Successfully");
+                })
+              } catch (error) {
+                return console.log(error.message)
+            }
+            return data;
+        },
     }
 }      
 module.exports = { resolvers }

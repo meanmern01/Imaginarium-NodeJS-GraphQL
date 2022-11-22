@@ -8,7 +8,7 @@ const typeDefs = gql`
         password:String!
         conpassword:String
         authToken:String
-        verify:Boolean
+        verify:Boolean      
     }
     type Otp {
         otp:String
@@ -22,6 +22,8 @@ const typeDefs = gql`
         signIn(email:String!,password:String!):User
         forgotPasswordOtp(email:String):User
         verifyOtp(email:String,otp:String,password:String,conpassword:String):User
+        signUpbyGoogle(email:String):User
+        signUpbyApple(email:String):User
     }
 `
 
