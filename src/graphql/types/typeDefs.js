@@ -9,6 +9,7 @@ const typeDefs = gql`
         conpassword:String
         authToken:String
         verify:Boolean      
+        langauage:String        
     }
     type Otp {
         otp:String
@@ -24,7 +25,8 @@ const typeDefs = gql`
         verifyOtp(email:String,otp:String,password:String,conpassword:String):User
         signUpbyGoogle(email:String):User
         signUpbyApple(email:String):User
+        langauage(id:ID,langauage:String):User
     }
 `
 
-module.exports = { typeDefs }
+module.exports = { typeDefs }   

@@ -22,6 +22,14 @@ const UserSchema = mongoose.Schema({
         type:Boolean,
         require:true,
         default:false    
+    },
+    langauage:{
+        enum : ['english','british','gujrati','german','spanish','russian'],
+        default:"english",        
+        type:String,
+    },
+    image:{
+        type:String,        
     }
 })
 

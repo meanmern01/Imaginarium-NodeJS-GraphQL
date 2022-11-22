@@ -1,16 +1,20 @@
+
+const { ApolloError, AuthenticationError } = require("apollo-server");
 const jwt = require("jsonwebtoken");
+const UserAuth = require('../model/Auth')
 
 const Authentication = async (req, res, next) => {
-  try {
-    const token = req.headers.authorization.split(" ")[1];
-    if (token) {
-      const decodetoken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-      req.user = decodetoken;
-      next();
+  let user = null
+  const token = req.split(" ")[1];
+  if (token) {
+    try {
+      const decodetoken = jwt.verify(token, "Imaginarium-GraphQL");
+      user = await UserAuth?.findOne({id:decodetoken.id})      
+    } catch (error) {
+      throw new AuthenticationError("Invalid Token.....");
     }
-  } catch (error) {
-    return res.status(401).json({ message: "token is not found" });
   }
-};
+  return user
+  };
 
-module.exports = Authentication;
+module.exports = {Authentication};

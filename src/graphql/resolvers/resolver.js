@@ -14,6 +14,13 @@ const genratetoken = (id) => {
 };
 
 const resolvers = {
+    Query :{
+        getUser : async ()=>{
+            const users = await UserAuth.find()
+            return users
+        }
+    },
+
     Mutation:{
         signUp : async (parent, args)=>{
             let data;
@@ -241,6 +248,21 @@ const resolvers = {
             }
             return data;
         },
+        
+        langauage: async (parent, args)=>{
+            let data;
+            try {
+                const {id,langauage} = args
+                await UserAuth.findOneAndUpdate({id:id},{$set:{langauage:langauage}},{new:true})
+                .then((result)=>{
+                    data = result
+                    console.log("Langauage Added Successfully");
+                })               
+              } catch (error) {
+                return console.log(error.message)
+            }
+            return data;
+        }
     }
 }      
 module.exports = { resolvers }
