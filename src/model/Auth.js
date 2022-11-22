@@ -1,3 +1,4 @@
+const { verify } = require('jsonwebtoken')
 const mongoose = require('mongoose')
 
 const UserSchema = mongoose.Schema({
@@ -16,6 +17,11 @@ const UserSchema = mongoose.Schema({
     authToken:{
         type:String,
         require:true        
+    },
+    verify:{
+        type:Boolean,
+        require:true,
+        default:false    
     }
 })
 

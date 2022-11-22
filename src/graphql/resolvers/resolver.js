@@ -38,12 +38,17 @@ const resolvers = {
                 if(password != conpassword){
                     return console.log("Confirm Password Was Not Matched")
                 }
+                let otp = await otpGenerator.generate(6, { lowerCaseAlphabets: false , upperCaseAlphabets: false, specialChars: false });
                 const hashpass = await bcrypt.hash(password, 10);
+                const hashotp = await bcrypt.hash(otp, 10);
                 await new UserAuth({
                     username, email, password : hashpass
                 }).save().then((result) => {
                     data = result
-                    console.log("User Create Successfully");
+                    SendEmail(email,"Verify User",otp)
+                    new OtpData ({email,otp:hashotp}).save().then(()=>{
+                        console.log("User Created Please Check Your Mail....");                        
+                    })
                 }).catch((err) => {
                     return console.log(err.message)
                 });                
@@ -53,29 +58,61 @@ const resolvers = {
             return data;           
         },
 
+        verifyUser : async (parent, args)=>{
+            try {
+                const {email, otp} = args
+                const user = await UserAuth.findOne({email:email})
+                if(!user){
+                    return console.log("User Is Not Registered...");
+                }
+                const UserOtp = await OtpData.findOne({email:email})
+                if(!UserOtp){
+                    return console.log("Otp Is Not Genrated...");
+                }
+                if(UserOtp.expiresAt < Date.now()){
+                    return console.log("Otp Is Expired...");
+                }
+                const validate = await bcrypt.compare(otp,UserOtp.otp)
+                if(!validate){
+                    return console.log("Enter Valid Otp...");
+                }
+                await UserAuth.findOneAndUpdate({email:email},{$set:{verify:true}},{new:true}).then(()=>{
+                    OtpData.findOneAndDelete({email:email}).then(()=>{
+                        return console.log("User Verified Successfully...");
+                    })
+                })
+            } catch (error) {
+                return console.log(error.message)
+            }
+            return "Success"
+        },
+
         signIn : async (parent, args)=>{
             let data
             try {
                 const {email, password} = args;
                 if(!email || !password){
-                    return console.log("Please Enter All Details")
+                    return console.log("Please Enter All Details...")
                 }
                 if(!validator.isEmail(email)){
-                    return console.log("Enter Valid Email")
+                    return console.log("Enter Valid Email...")
                 }
                 const user = await UserAuth.findOne({email:email})
                 if(!user){
-                    return console.log("User Is Not Registered")
+                    return console.log("User Is Not Registered...")
                 }
                 const strongPassword = new RegExp(
                     "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})"
                     );
                   if (!strongPassword.test(password.trim())) {
-                    return console.log("Password must be at least 8 characters long with one uppercase letter, one lowercase letter, one digit, and one special character !")
+                    return console.log("Password must be at least 8 characters long with one uppercase letter, one lowercase letter, one digit, and one special character !...")
                   }                
                 const validate = await bcrypt.compare(password, user.password);
                 if(!validate){
-                    return console.log("Invalid Credentials");
+                    return console.log("Invalid Credentials...");
+                }
+                if(user.verify != true){
+                    return console.log("User Is Not Verified...");
                 }
                 let token = await genratetoken(user.id)
                 await UserAuth.findByIdAndUpdate(
@@ -85,7 +122,7 @@ const resolvers = {
                   )
                     .then((result) => {
                       data = result;
-                      return console.log("User Login Successfully");
+                      return console.log("User Login Successfully...");
                     })
                     .catch((err) => {
                       return console.log(err.message);
@@ -110,7 +147,7 @@ const resolvers = {
                     email, 
                     otp:hashOtp,
                     createdAt: Date.now(),
-                    expiresAt: Date.now() + 1000 * 10,                    
+                    expiresAt: Date.now() + 1000 * 60 * 60,                    
                 }).save().then(()=>{
                     console.log("Otp Send Successfully");
                 })
@@ -118,6 +155,51 @@ const resolvers = {
                 return console.log(error.message)
             }
             return null;
+        },
+
+        verifyOtp : async (parent,args)=>{
+            try {
+                const { otp, password, conpassword, email} = args
+                const userOtp = await OtpData.findOne({email:email})
+                if(!userOtp){
+                    return console.log("Otp is Expired in DB");
+                }
+                if(userOtp.expiresAt < Date.now()){
+                    await OtpData.findOneAndDelete({email:email}).then(()=>{
+                        return console.log("Otp is Expired");
+                    })
+                }
+                let validate = await bcrypt.compare(otp,userOtp.otp)
+                if(!validate){
+                    return console.log("Enter Valid Otp!!");
+                }
+                const strongPassword = new RegExp(
+                    "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})"
+                    );
+                  if (!strongPassword.test(password.trim())) {
+                    return console.log("Password must be at least 8 characters long with one uppercase letter, one lowercase letter, one digit, and one special character !")
+                  }
+                if(password != conpassword){
+                    return console.log("Confirm Password Was Not Matched")
+                }
+                const hashpass = await bcrypt.hash(password, 10);
+                await UserAuth.findOneAndUpdate(
+                    { email: email },
+                    { password: hashpass },
+                    { new: true }
+                  )
+                    .then((result) => {
+                       OtpData.findOneAndDelete({email:email}).then(()=>{
+                           return console.log("Password Update Successfully");
+                       })
+                    })
+                    .catch((err) => {
+                      return console.log(err.message);
+                    });
+            } catch (error) {
+                return console.log(error.message)
+            }
+            return null
         }
     }
 }      
