@@ -11,8 +11,7 @@ const typeDefs = gql`
         verify:Boolean      
         langauage:String
         image:String
-        firstname:String
-                
+        firstname:String                
     }  
     type Feedback {
         user:String
@@ -26,10 +25,81 @@ const typeDefs = gql`
     }
     type Otp {
         otp:String
+    } 
+    type Logline {
+        incitingIncident:String
+        protagonist:String
+        action:String
+        antagonist:String
+    } 
+    type Actor {
+        actorname:String
+        heroname:String
+        actorDescription:String
+        actorImage:String
+    }
+    type Genres { 
+        name:[String]
+    }
+    type SimilarMovie {
+        moviebanner:String
+        moviename:String
+    } 
+    type Act {
+        actName: String
+        Scenes:[Scene]
+    }
+    type Scene {
+        sceneName:String
+        description:String
+        actors:[Actor]
+    }  
+    type Movie {
+        moviebanner:String!
+        title:String!
+        type:String!
+        logline:Logline
+        tagline:String
+        synopsis:String
+        actors:[Actor]
+        author:String
+        tags:[String]
+        genres:[Genres]
+        similarmovies:[SimilarMovie]
+        screenplay:[Act]
+    } 
+    input LoglineInput {
+        incitingIncident:String
+        protagonist:String
+        action:String
+        antagonist:String
+    } 
+    input ActorInput {
+        actorname:String
+        heroname:String
+        actorDescription:String
+        actorImage:String
+    }
+    input GenresInput { 
+        name:[String]
+    }
+    input SimilarMovieInput {
+        moviebanner:String
+        moviename:String
+    } 
+    input ActorInput {
+        actName: String
+        Scenes:[SceneInput]
+    }
+    input SceneInput {
+        sceneName:String
+        description:String
+        actors:[ActorInput]
     }   
     type Query {
         getUser: [User!]
         logout(email:String!): [User!]
+        getMovie(email:String!): [Movie]
     }
      type Mutation {
         signUp(username:String!,email:String!,password:String!,conpassword:String!):User
@@ -42,6 +112,8 @@ const typeDefs = gql`
         langauage(id:ID,langauage:String):Boolean
         editProfile(file: Upload,email:String,firstname:String,username:String,password:String,conpassword:String,oldpassword:String): User
         feedback(user:String,type:String,question:String,description:String):Feedback
+        addNewMovie(type:String!,moviebanner:String!,title:String!,tagline:String,synopsis:String,logline:LoglineInput,genres:[GenresInput],tags:[String],actors:[ActorInput],similarmovies:[SimilarMovieInput],author:String,screenplay:[ActorInput]):Movie
+        addNewActor(actorname:String,heroname:String,actorDescription:String,actorImage:String):Actor
     }
 `
 

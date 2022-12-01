@@ -1,6 +1,7 @@
 const UserAuth = require("../../model/Auth");
 const OtpData = require("../../model/Otp");
 const Feedback = require("../../model/Feedback");
+const Moviedata = require("../../model/Movie");
 var validator = require("validator");
 var bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -28,6 +29,11 @@ const resolvers = {
       }).catch((err)=>{
         return console.log(err.message);        
       })
+    },
+
+    getMovie: async (_,args)=>{
+      const data = await Moviedata.find({author:args.email})
+      return data
     }
   },
 
@@ -400,7 +406,69 @@ const resolvers = {
         return console.log(err.message);
       })
       return data
+    },
+
+    addNewMovie: async (parent, args)=>{
+      let data
+      try {
+        const {type,moviebanner,title,tagline,synopsis,logline,genres,tags,actors,similarmovies,author,screenplay} = args
+        const user = await UserAuth.findOne({ email: author });
+        if (!user) {
+          return console.log("User Doesn't Exists...");
+        }
+        if (user.verify != true) {
+          return console.log("User Doesn't Verify...");
+        }
+        const Movie = await Moviedata.findOne({ title: title });
+        if (Movie) {
+          const userMovie = await Moviedata.findOne({ author: author });
+          if (userMovie) {
+            return console.log(
+              "You Can't Create Movie This Same Name, Try With Another..."
+            );
+          } else {
+            await new Moviedata({
+              ...args,
+            })
+              .save()
+              .then((result) => {
+                data = result;
+              })
+              .catch((err) => {
+                return console.log(err.message);
+              });
+          }
+        } else {
+          await new Moviedata({
+            ...args,
+          })
+            .save()
+            .then((result) => {
+              data = result;
+            })
+            .catch((err) => {
+              return console.log(err.message);
+            });
+        }
+      } catch (error) {
+        return console.log(error.message);
+      }
+      return data
+    },
+
+    addNewActor: async (parent, args)=>{
+      try {        
+        const {actorname,heroname,actorDescription,actorImage} = args
+        Actor = {
+          actorname,heroname,actorDescription,actorImage
+        }
+      } catch (error) {
+        return console.log(error.message);
+      }
+      return Actor
     }
+    
+
 
 
   },
