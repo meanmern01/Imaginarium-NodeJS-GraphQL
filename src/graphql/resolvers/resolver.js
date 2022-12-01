@@ -1,5 +1,6 @@
 const UserAuth = require("../../model/Auth");
 const OtpData = require("../../model/Otp");
+const Feedback = require("../../model/Feedback");
 var validator = require("validator");
 var bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -382,6 +383,24 @@ const resolvers = {
         console.log(error.message);
       }
     },
+
+    feedback: async (parent, args)=>{
+      let data
+      const {user,type,question,description} = args
+      const userData = await UserAuth.findOne({email:user})
+      if(!userData){
+        return console.log("User Is Not Exists...");
+      }
+      await new Feedback ({
+        user,type,question,description
+      }).save().then((result)=>{
+        data = result
+       return console.log("FeedBack Store Successfully...");
+      }).catch((err)=>{
+        return console.log(err.message);
+      })
+      return data
+    }
 
 
   },

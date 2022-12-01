@@ -13,7 +13,13 @@ const typeDefs = gql`
         image:String
         firstname:String
                 
-    }   
+    }  
+    type Feedback {
+        user:String
+        type:String
+        question:String
+        description:String
+    } 
     type Auth{
         oldpassword:String
         conpassword:String
@@ -35,6 +41,7 @@ const typeDefs = gql`
         signUpbyApple(email:String):User
         langauage(id:ID,langauage:String):Boolean
         editProfile(file: Upload,email:String,firstname:String,username:String,password:String,conpassword:String,oldpassword:String): User
+        feedback(user:String,type:String,question:String,description:String):Feedback
     }
 `
 
