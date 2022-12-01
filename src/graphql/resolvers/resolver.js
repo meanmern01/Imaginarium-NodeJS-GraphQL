@@ -19,6 +19,15 @@ const resolvers = {
       const users = await UserAuth.find();
       return users;
     },
+
+    logout: async (_,args)=>{
+      const user = await UserAuth.findOneAndUpdate({email:args.email},{authToken:null},{new:true})
+      .then((result)=>{
+        return console.log("User LogOut Successfully...");
+      }).catch((err)=>{
+        return console.log(err.message);        
+      })
+    }
   },
 
   Mutation: {
@@ -373,6 +382,8 @@ const resolvers = {
         console.log(error.message);
       }
     },
+
+
   },
 };
 module.exports = { resolvers };
